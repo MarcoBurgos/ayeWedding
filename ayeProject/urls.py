@@ -23,6 +23,6 @@ admin.site.site_title = "A & E Admin Portal"
 admin.site.index_title = "Bienvenida/o a la consola de administración del sitio"
 
 urlpatterns = [
-    path('', include(ayeApp.urls)),
+    path('', include('ayeApp.urls')),
     path('admin/', admin.site.urls),
 ]

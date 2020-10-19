@@ -1,5 +1,5 @@
 from django.urls import path
-from rsvpApp import views
+from ayeApp import views
 from django.conf.urls.static import static
 
 urlpatterns = [

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from rsvpApp.models import Invitation
+from ayeApp.models import Invitation
 
 # Register your models here.
 
