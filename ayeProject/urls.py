@@ -15,7 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.urls import include
+from ayeApp import views
+
+admin.site.site_header = "A & E Admin Console"
+admin.site.site_title = "A & E Admin Portal"
+admin.site.index_title = "Bienvenida/o a la consola de administración del sitio"
 
 urlpatterns = [
+    path('', include(ayeApp.urls)),
     path('admin/', admin.site.urls),
 ]

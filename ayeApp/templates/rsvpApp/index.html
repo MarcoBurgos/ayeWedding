@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+{% load static %}
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+ <head>
+
+ <meta charset="utf-8">
+ <meta http-equiv="X-UA-Compatible" content="IE=edge">
+ <title>A&amp;E Boda </title>
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="description" content="Boda Andrea y Edgar 31 de Enero de 2021" />
+ <meta name="keywords" content="Boda" />
+ <meta name="author" content="Marco Burgos" />
+
+   <!-- Facebook and Twitter integration -->
+ <meta property="og:title" content=""/>
+ <meta property="og:image" content=""/>
+ <meta property="og:url" content=""/>
+ <meta property="og:site_name" content=""/>
+ <meta property="og:description" content=""/>
+ <meta name="twitter:title" content="" />
+ <meta name="twitter:image" content="" />
+ <meta name="twitter:url" content="" />
+ <meta name="twitter:card" content="" />
+
+
+
+ <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+ <link rel="icon" href="{% static 'images/flaticon/favicon.ico' %}">
+
+ <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,300,600,400italic,700' rel='stylesheet' type='text/css'>
+ <link href="https://fonts.googleapis.com/css?family=Clicker+Script" rel="stylesheet">
+
+ <!-- Animate.css -->
+ <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+ <!-- Icomoon Icon Fonts-->
+ <link rel="stylesheet" href="{% static 'css/icomoon.css' %}">
+ <!-- Simple Line Icons -->
+ <link rel="stylesheet" href="{% static 'css/simple-line-icons.css' %}">
+ <!-- Owl Carousel -->
+ <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+ <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
+ <!-- Magnific popup  -->
+ <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+ <!-- Bootstrap  -->
+ <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+
+ <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+ <!-- Modernizr JS -->
+ <script src="{% static 'js/modernizr-2.6.2.min.js' %}"></script>
+ <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+ <!-- FOR IE9 below -->
+ <!--[if lt IE 9]>
+ <script src="js/respond.min.js"></script>
+ <![endif]-->
+<script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+ <script>
+ $(document).ready(function() {
+   $("#target").submit(function( event ) {
+     var emailFormForm = $("#email").val();
+
+
+     $("#btnSearchRegister").html('Cargando...');
+       $.ajax({
+         type:"GET",
+         url: '/ajax_call/',
+         data: {
+          'email': emailFormForm
+        },
+        success: function(data) {
+          if (data.is_there) {
+            var guest_names = data["guests"].split(",");
+            var name_from_db = data["name"];
+            var tickets_from_db = data["no_of_guests"];
+            var guests_confirmed = data["confirmed"]
+            if (guests_confirmed) {
+              guests_confirmed = guests_confirmed.split(",")
+              var filtered = guest_names.filter(function(x) {
+                return guests_confirmed.indexOf(x) < 0;
+              });
+              $('#div-container-guest-names-list').empty().append(guests_confirmed.map((value) => {
+                	return $("<div class='container-guest-elements'>" +
+                  "<label class='label-sign-up' for='"+ value + "'>"+ value + "</label>" +
+                  "<input type='checkbox' id='id_" + value + "'  name='" + value + "' checked='yes' value='"+ value + "'>" +
+                  "</div>");
+                }));
+                $('#div-container-guest-names-list').append(filtered.map((value) => {
+                  	return $("<div class='container-guest-elements'>" +
+                    "<label class='label-sign-up' for='"+ value + "'>"+ value + "</label>" +
+                    "<input type='checkbox' id='id_" + value + "'  name='" + value + "' value='"+ value + "'>" +
+                    "</div>");
+                  }));
+            } else {
+              $('#div-container-guest-names-list').empty().append(guest_names.map((value) => {
+                  return $("<div class='container-guest-elements'>" +
+                  "<label class='label-sign-up' for='"+ value + "'>"+ value + "</label>" +
+                  "<input type='checkbox' id='id_" + value + "'  name='" + value + "' value='"+ value + "'>" +
+                  "</div>");
+                }));
+            }
+
+            $("#replace_text").html('Hola, ' + name_from_db + ', tienes ' + tickets_from_db + ' boletos disponibles. Marca la casilla de los que asitirán y deja en blanco los invitados que no asistirán' );
+            $("#target").hide(300);
+            $("#box-guest").show(500);
+          }
+          else {
+            swal("Algo salió mal", data.error_message, "error");
+          }
+        },
+
+       dataType: 'json',
+       });
+       $("#btnSearchRegister").html('Buscar mi registro');
+
+
+     event.preventDefault();
+   });
+
+   $("#saveGuests").submit(function (event) {
+     var allGuests = [];
+
+     $('input[type="checkbox"]:checked').each(function () {
+        console.log($(this).val().length)
+        if ($(this).val().length>0){
+          allGuests.push($(this).val());
+        }
+
+     });
+
+     var el = document.getElementsByName("csrfmiddlewaretoken");
+     csrf_value = el[0].getAttribute("value");
+     var emailFormForm = $("#email").val();
+     console.log("Email value is: " + emailFormForm)
+
+
+     $.ajax({
+       type: "POST",
+       url: "/ajax_call/",
+       data: {
+         'guests': allGuests.toString(),
+         'csrfmiddlewaretoken': csrf_value,
+         'email': emailFormForm
+       },
+       success: function () {
+        swal("¡Gracias por confirmar!", "Tu registro ha quedado salvado", "success");
+      }
+       });
+
+
+    $("#box-guest").hide(100);
+    $("#subtitle-confirmation").hide(100);
+    $("#confirmation-greetings").show(100);
+    event.preventDefault();
+     });
+ });
+</script>
+
+
+ </head>
+ <body>
+ <header role="banner" id="qbootstrap-header">
+   <div class="container">
+     <!-- <div class="row"> -->
+       <nav class="navbar navbar-default">
+         <div class="navbar-header">
+           <!-- Mobile Toggle Menu Button -->
+       <a href="#" class="js-qbootstrap-nav-toggle qbootstrap-nav-toggle" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar"><i></i></a>
+             <a class="navbar-brand" href="index.html">A&amp;E Boda</a>
+         </div>
+         <div id="navbar" class="navbar-collapse collapse">
+           <ul class="nav navbar-nav navbar-right">
+             <li class="active"><a href="#" data-nav-section="home"><span>Inicio</span></a></li>
+             <li><a href="#" data-nav-section="groom-bride"><span>La Novia &amp; el Novio</span></a></li>
+             <li><a href="#" data-nav-section="when-where"><span>Cuándo &amp; Dónde</span></a></li>
+             <li><a href="#" data-nav-section="rsvp"><span>Confirmación</span></a></li>
+           </ul>
+         </div>
+       </nav>
+     <!-- </div> -->
+   </div>
+ </header>
+
+ <div class="qbootstrap-hero" data-section="home">
+   <div class="qbootstrap-overlay"></div>
+   <div class="qbootstrap-cover text-center"  style="background-image: url({% static 'images/cover_bg_3.jpg' %}); background-size: cover; background-position: center;">
+     <div class="display-t">
+       <div class="display-tc">
+         <div class="container">
+           <div class="col-md-10 col-md-offset-1">
+             <div class="animate-box svg-sm colored">
+               <img src="{% static 'images/flaticon/svg/004-nature.svg' %}" class="svg" alt="Fondo Header">
+               <h1 class="holder"><span>La boda de </span></h1>
+               <h2>Andrea &amp; Edgar</h2>
+               <p>31-01-2021</p>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <div id="qbootstrap-couple" class="qbootstrap-section-gray">
+   <div class="container">
+     <div class="row animate-box">
+       <div class="col-md-8 col-md-offset-2 animate-box">
+         <div class="col-md-12 text-center section-heading svg-sm colored">
+           <img src="{% static 'images/flaticon/svg/005-black.svg' %}" class="svg" alt="Fondo section" style="fill: black !import">
+           <h2>¡Nos casamos!</h2>
+           <p>Decidimos pasar el resto de nuestras vidas juntos y queremos que formes parte de este evento de unión tan importante para nosotros.
+             Será un honor contar con tu presencia.</p>
+         </div>
+       </div>
+     </div>
+     <div class="row animate-box">
+       <div class="col-md-8 col-md-offset-2 text-center">
+         <div class="col-md-5 col-sm-5 col-xs-5 nopadding">
+           <img src="{% static 'images/bride.jpg' %}" class="img-responsive" alt="Foto novia">
+           <h3>Andrea Peña</h3>
+           <span>Novia</span>
+         </div>
+         <div class="col-md-2 col-sm-2 col-xs-2 nopadding"><h2 class="amp-center"><img src="{% static 'images/flaticon/svg/003-luxury.svg' %}" style="border-radius: 0%;" class="svg img-responsive" alt="Foto novio"></h2></div>
+         <div class="col-md-5 col-sm-5 col-xs-5 nopadding">
+           <img src="{% static 'images/groom.jpg' %}" class="img-responsive" alt="Foto novio">
+           <h3>Edgar Orozco</h3>
+           <span>Novio</span>
+         </div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <div id="qbootstrap-countdown"  style="background-image: url({% static 'images/cover_bg_2.jpg' %}); background-size: cover; background-position: center; padding-top: 2em; padding-bottom: 2em" data-section="wedding-day">
+   <div class="overlay"></div>
+   <div class="display-over">
+     <div class="container">
+       <div class="row animate-box">
+         <div class="col-md-12 section-heading text-center svg-sm colored">
+           <img src="{% static 'images/flaticon/svg/006-flower-bell-outline-design-variant-with-vines-and-leaves.svg' %}" class="svg" alt="Foto novia">
+           <h2 class="">El Día de la Boda</h2>
+           <span class="datewed">Domingo, 31 de Enero de 2021</span>
+         </div>
+       </div>
+       <div class="row animate-box">
+         <div class="col-md-8 col-md-offset-2 text-center">
+           <p class="countdown">
+             <span id="days"></span>
+             <span id="hours"></span>
+             <span id="minutes"></span>
+             <span id="seconds"></span>
+           </p>
+         </div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <div id="qbootstrap-groom-bride" data-section="groom-bride">
+   <div class="container">
+     <div class="row animate-box">
+       <div class="col-md-8 col-md-offset-2">
+         <div class="col-md-12 text-center section-heading svg-sm-2 colored">
+           <img src="{% static 'images/flaticon/svg/002-wedding-couple.svg' %}" class="svg" alt="Header display">
+           <h2>Novia &amp; Novio</h2>
+           <p>Estamos convencidos que la elección de la pareja es sin duda, una de las decisiones más importantes de la vida. Estamos muy contentos de habernos elegido mutuamente.</p>
+         </div>
+       </div>
+     </div>
+     <div class="row">
+       <div class="col-md-6">
+         <div class="couple bride text-center animate-box">
+           <img src="{% static 'images/bride1.jpg' %}" class="img-responsive" alt="Foto Novia perfil">
+           <div class="desc">
+             <h2>Andrea Peña</h2>
+             <p>Edgar, gracias por escogerme como la mujer de tu vida. Estoy muy agradecida con Dios por ponernos en el mismo camino y permitirnos vivir juntos cada momento. Te admiro, te respeto y te prometo ser la mejor versión de mi misma todos los días.</p>
+           </div>
+         </div>
+       </div>
+       <div class="col-md-6">
+         <div class="couple groom text-center animate-box">
+           <img src="{% static 'images/groom2.jpg' %}" class="img-responsive" alt="Foto novio perfil">
+           <div class="desc">
+             <h2>Edgar Orozco</h2>
+             <p>Andrea, desde que te conocí le pedí a Dios encontrar a alguien como tu para el resto de mi vida, fui tan claro y Dios tan bueno que me ha puesto a tu lado para compartir toda mi vida contigo. Te amo y siempre seré tu astronauta.</p>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
+ </div>
+
+
+ <div id="qbootstrap-when-where" data-section="when-where" style="padding-top: 0em;">
+   <div class="container">
+     <div class="row animate-box">
+       <div class="col-md-8 col-md-offset-2">
+         <div class="col-md-12 text-center section-heading svg-sm colored">
+           <img src="{% static 'images/flaticon/svg/005-black.svg' %}" class="svg" style="margin-bottom:0px;" alt="Foto section">
+           <h2>Ceremonia Religiosa <br>&amp; Recepción</h2>
+           <div class="row">
+           <div class="col-md-10 col-md-offset-1 subtext">
+           </div>
+         </div>
+         </div>
+       </div>
+     </div>
+     <div class="row row-bottom-padded-md">
+       <div class="col-md-6 text-center animate-box">
+         <div class="wedding-events">
+           <div class="ceremony-bg" style="background-image: url({% static 'images/wed-ceremony.jpg' %});"></div>
+           <div class="desc">
+             <h3>Ceremonia Religiosa</h3>
+             <div class="row">
+               <div class="col-md-2 col-md-push-5">
+                 <div class="icon-tip" style="margin-bottom: 20px;">
+                   <span class="icon"><i class="icon-heart-o"></i></span>
+                 </div>
+               </div>
+               <div class="col-md-5 col-md-pull-1">
+                 <div class="date">
+                   <i class="icon-calendar"></i>
+                   <span>Domingo</span>
+                   <span>31 Ene 2021</span>
+                 </div>
+               </div>
+               <div class="col-md-5 col-md-pull-1">
+                 <div class="date">
+                   <i class="icon-clock2"></i>
+                   <span>16:00 PM</span>
+                 </div>
+               </div>
+             </div>
+             <p><b>Templo Nuestra Señora de la Salud</b><br>
+               Paseo Lomas Altas 265. <br> Lomas del Valle, 45128. Zapopan, Jalisco
+             </p>
+             <!-- <p><a href="#" class="btn btn-primary btn-sm">Conocer más</a></p> -->
+           </div>
+         </div>
+       </div>
+       <div class="col-md-6 text-center animate-box">
+         <div class="wedding-events">
+           <div class="ceremony-bg" style="background-image: url({% static 'images/wed-party.jpg' %});"></div>
+           <div class="desc">
+             <h3>Recepción</h3>
+             <div class="row">
+               <div class="col-md-2 col-md-push-5">
+                 <div class="icon-tip" style="margin-bottom: 20px;">
+                   <span class="icon"><i class="icon-heart-o"></i></span>
+                 </div>
+               </div>
+               <div class="col-md-5 col-md-pull-1">
+                 <div class="date">
+                   <i class="icon-calendar"></i>
+                   <span>Domingo</span>
+                   <span>31 Ene 2021</span>
+                 </div>
+               </div>
+               <div class="col-md-5 col-md-pull-1">
+                 <div class="date">
+                   <i class="icon-clock2"></i>
+                   <span>20:00 PM</span>
+                 </div>
+               </div>
+             </div>
+             <p><b>La Chabacana </b><br>
+               Carretera Federal a Nogales 11440. <br> Pinar de la Venta. Zapopan, Jalisco
+             </p>
+             <!-- <p><a href="#" class="btn btn-primary btn-sm">Conocer más</a></p> -->
+           </div>
+         </div>
+       </div>
+
+       <div class="col-md-12 text-center animate-box" style="margin-top: 15px;">
+         <div class="wedding-events">
+           <div class="ceremony-bg col-md-8" style="background-image: url({% static 'images/wed-registry.jpg' %}); height: 329.63px;">
+           </div>
+           <div class="desc col-md-4" style="height: 329.63px;">
+             <h3>Mesa de regalos</h3>
+             </p>
+             <p><a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/50326579" class="btn btn-primary btn-sm">Ir a la mesa de regalos</a></p>
+           </div>
+         </div>
+       </div>
+
+
+     </div>
+   </div>
+   </div>
+ </div>
+
+
+
+ <div id="qbootstrap-started" class="qbootstrap-bg" data-section="rsvp"  style="background-image: url({% static 'images/cover_bg_1.jpg' %}); background-size: cover; background-position: center; padding-top: 2em;">
+   <div class="overlay"></div>
+   <div class="container">
+     <div class="row animate-box">
+       <div class="col-md-8 col-md-offset-2">
+         <div class="col-md-12 text-center section-heading svg-sm colored">
+           <img src="{% static 'images/flaticon/svg/005-two.svg' %}" class="svg" alt="Foto Section">
+           <h2>¡Acompáñanos!</h2>
+           <div class="row">
+           <div id="subtitle-confirmation" style="display: block" class="col-md-10 col-md-offset-1 subtext">
+             <p style="color: white;">Ingresa tu correo electrónico, busca tu registro y confirma tu asistencia</p>
+           </div>
+           <div style="display: none" id="confirmation-greetings">
+             <p class="greetings">Puedes actualizar tu registro hasta el 31 de Diciembre, si lo deseas.</p>
+           </div>
+         </div>
+         </div>
+       </div>
+     </div>
+     <div class="row animate-box" id="target" style="display: block">
+       <div class="col-md-10 col-md-offset-1">
+         <form class="form-inline" >
+           {% csrf_token %}
+
+           <div class="col-md-6 ">
+             <div class="form-group">
+                {{ email_form.as_p }}
+               <!-- <label for="email" class="sr-only">Email</label>
+               <input type="email" class="form-control" id="email" placeholder="Email"> -->
+             </div>
+           </div>
+           <div class="col-md-6">
+
+             <button id='btnSearchRegister'  type="submit" class="btn btn-default btn-block">Buscar mi registro</button>
+           </div>
+         </form>
+       </div>
+     </div>
+     <div style="display: none" id="box-guest">
+       <form id="saveGuests" class="sign-up" method="post">
+         {% csrf_token %}
+         <h2 class="sign-up-title">Confirma a tus invitados</h2>
+         <h5 id="replace_text" class="intro_guests" style="margin-bottom:15px; font-family: 'Source Sans Pro', Arial, sans-serif;">Hola, {{invitado_nombre}}, tienes {{invitation_num}} boletos disponibles.</h5>
+         <!-- <h5 class="intro_guests" style="margin-bottom:15px; font-family: 'Source Sans Pro', Arial, sans-serif;"></h5> -->
+         <div id="div-container-guest-names-list" class='container-guest-names-list'>
+           {{ guests_form }}
+         </div>
+         <input  type="submit" value="Confirmar" class="sign-up-button">
+     </form>
+     </div>
+
+   </div>
+ </div>
+
+
+ <footer id="footer" role="contentinfo">
+   <div class="container">
+     <div class="row row-bottom-padded-sm">
+       <div class="col-md-12">
+         <p class="copyright text-center">&copy; 2020 <a href="index.html">A&amp;E Boda</a>. Todos los derechos reservados. <br>
+         Desarrollo de <a href="https://github.com/MarcoBurgos" target="_blank">Marco Burgos</a></p>
+       </div>
+     </div>
+   </div>
+ </footer>
+
+
+ <!-- jQuery -->
+ <script src="{% static 'js/jquery.min.js' %}"></script>
+ <!-- jQuery Easing -->
+ <script src="{% static 'js/jquery.easing.1.3.js' %}"></script>
+ <!-- Bootstrap -->
+ <script src="{% static 'js/bootstrap.min.js' %}"></script>
+ <!-- Waypoints -->
+ <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+ <!-- YTPlayer -->
+ <script src="{% static 'js/jquery.mb.YTPlayer.min.js' %}"></script>
+ <!-- Flexslider -->
+ <script src="{% static 'js/jquery.flexslider-min.js' %}"></script>
+ <!-- Owl Carousel -->
+ <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+ <!-- Parallax -->
+ <script src="{% static 'js/jquery.stellar.min.js' %}"></script>
+ <!-- Magnific Popup -->
+ <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+ <script src="{% static 'js/magnific-popup-options.js' %}"></script>
+ <!-- Main JS (Do not remove) -->
+ <script src="{% static 'js/main.js' %}"></script>
+
+ </body>
+</html>
