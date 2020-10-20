@@ -15,3 +15,4 @@ class InvitationForm(admin.ModelAdmin):
 
 
 admin.site.register(Invitation, InvitationForm)
+admin.site.unregister(Group)
