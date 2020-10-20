@@ -1,5 +1,6 @@
 from django.contrib import admin
 from ayeApp.models import Invitation
+from django.contrib.auth.models import Group,User
 
 # Register your models here.
 
