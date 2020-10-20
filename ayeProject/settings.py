@@ -28,7 +28,7 @@ SECRET_KEY = 'zp)$in&^x=-29t@lq*mxt1d48(**z_5v8nl+q=4%4x-@$ik3qp'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['boda-andreayedgar.herokuapp.com','127.0.0.1']
+ALLOWED_HOSTS = ['boda-andreayedgar.herokuapp.com','127.0.0.1', 'andreayedgar.com', 'www.andreayedgar.com']
 
 
 # Application definition
